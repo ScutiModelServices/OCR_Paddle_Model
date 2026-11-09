@@ -1,0 +1,12 @@
+.git
+.venv*
+.uv_cache
+__pycache__
+.pytest_cache
+tests
+_voices
+_zip_versions
+tokens.json
+settings.json
+.env
+.env.*

@@ -1,0 +1,15 @@
+# Adds the NVIDIA GPU and the GPU image flavor. Use with docker-compose.yml (see its header). UNTESTED.
+services:
+  ocr_paddle_model:
+    build:
+      args:
+        FLAVOR: gpu
+        BASE: nvidia/cuda:12.6.3-devel-ubuntu22.04
+    shm_size: "8gb"  # the model server passes image tensors through /dev/shm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

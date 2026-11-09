@@ -1,0 +1,60 @@
+# PaddleOCR service: one container with tokens, limits and the admin page in front of two models, and one nginx
+# (ocr_paddle_model_lb) as the front door like the other model services. The service picks its model at start: PaddleOCR-VL
+# on a capable NVIDIA GPU, PP-OCRv5 on the CPU otherwise; only that model's weights are downloaded (admin Download).
+# One replica only: calls run one at a time in one process, so there is no replica setting. Callers use http://<host>:29262
+# and POST one page image to /v1/ocr.
+# CPU machine:   docker compose --env-file .env.compose up -d --build
+# NVIDIA GPU:    docker compose --env-file .env.compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+
+name: ocr_paddle_model
+
+services:
+  ocr_paddle_model:
+    image: ocr_paddle_model:latest
+    restart: unless-stopped
+    environment:
+      SERVICE_ADMIN_PASSWORD: ${SERVICE_ADMIN_PASSWORD:-}
+      SERVICE_NUM_THREAD: ${SERVICE_NUM_THREAD:-}
+    volumes:
+      - ocr_paddle_model_models:/models
+      - ocr_paddle_model_data:/data
+    build:
+      context: .
+      args:
+        FLAVOR: ${SERVICE_FLAVOR:-cpu}
+        BASE: ${SERVICE_BASE:-python:3.12-slim}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:29262/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 300s
+    networks: [ocr_paddle_model]
+
+  ocr_paddle_model_lb:
+    container_name: ocr_paddle_model_lb
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${SERVICE_PORT:-29262}:29262"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      ocr_paddle_model:
+        condition: service_healthy
+    networks:
+      ocr_paddle_model:
+      citadel:
+        aliases: [ocr_paddle_model_lb]
+
+volumes:
+  ocr_paddle_model_models:
+    name: ocr_paddle_model_models
+  ocr_paddle_model_data:
+    name: ocr_paddle_model_data
+networks:
+  # Other stacks reach http://ocr_paddle_model_lb:29262 by joining this network.
+  ocr_paddle_model:
+    name: ocr_paddle_model
+  citadel:
+    name: citadel_core
+    external: true

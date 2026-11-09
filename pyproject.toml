@@ -1,0 +1,34 @@
+[project]
+name = "ocr_paddle_model"
+description = "One HTTP service that runs PaddleOCR-VL on a capable NVIDIA GPU and PP-OCRv5 on the CPU otherwise, with tokens, limits and an admin page in front"
+version = "0.1.0"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv==1.2.2",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "httpx>=0.27",  # talks to the PaddleOCR-VL model server
+    "huggingface-hub>=0.34",  # the update check and the weights download
+]
+# PaddlePaddle, PaddleOCR and (GPU flavor) vLLM are installed by the Dockerfile; the cpu group is for a native run.
+
+[dependency-groups]
+dev = ["pytest>=8.0", "playwright>=1.40"]
+# The CPU model's runtime for a native run (run.bat). The Dockerfile installs PaddlePaddle itself, CPU or GPU, never both.
+cpu = ["paddlepaddle", "paddleocr"]
+
+[tool.uv]
+package = false  # runs from src/, only the dependencies are installed
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true  # runs from src/, installs only the dependencies
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,38 @@
+# Python
+.venv/
+.venv_*/
+.uv-cache/
+.uv_cache/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Runtime data, secrets and local settings
+.data/
+.output/
+.env
+.env.*
+!.env.example
+secrets/
+.secrets/
+tokens.json
+tokens.json.lock
+settings.json
+.python-version
+
+# Local model files (STC_S1Mini_Model's GGUF files)
+.local-models/
+
+# Reference voices of a local run (TTS_Audio8_Model, TTS_Kitten2_Model)
+_voices/
+
+# Release and deploy output
+_zip_versions/
+tools/deploy.local.ini
+
+# Fetched at build time (IMG_TEM_Model)
+_tem_code/
