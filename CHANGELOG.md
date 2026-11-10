@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Playground: no token to paste
+
+The Try it panel signs in with a temporary public token made from the admin session (named `playground (temporary)`, valid 1 day, revoked on sign-out or when the tab closes), so the service token field is hidden and choices such as voices load by themselves. The token shows in the tokens list while it lives.
+
+
 - First version, built from `OCR_SGLang_Model`: one service with two OCR models chosen by the hardware. PaddleOCR-VL (GPU model server plus layout pipeline) on a Linux NVIDIA GPU with compute capability 8.0 or higher and `min_vram_mb` of memory; PP-OCRv5 mobile on the CPU otherwise. `device` setting `auto`, `gpu` or `cpu`; `GET /v1/device` and the admin page show the choice and the reason.
 - Only the chosen model's weights are checked, downloaded and loaded (two Hub repositories each; one combined revision string on the Updates card).
 - `POST /v1/ocr` (one PNG, JPEG or WebP image as the body) replaces SGLang's chat forwarding. No streaming, no answer cache, calls run one at a time.
